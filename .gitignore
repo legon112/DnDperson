@@ -1,0 +1,6 @@
+venv
+.env
+о
+__pycache__
+test.py
+func.py
