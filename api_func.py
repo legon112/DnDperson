@@ -10,24 +10,25 @@ obj_db = client_con['CharDnD']
 lists = obj_db['list']
 
 api_address = 'https://www.dnd5eapi.co/'
-api_races = api_address + 'api/races/'
-api_classes = api_address + 'api/classes/'
 
-all_races = [i['name'] for i in requests.get(url= api_races).json()['results']]
 
 # if not lists.find():
 # lists.insert_one({'races' : all_races})
-races = obj_db['races']
+# races = obj_db['races']
 # races.insert_many([requests.get(url= api_races + i).json() for i in all_races])
 
-all_classes = [i['index'] for i in requests.get(url= api_classes).json()['results']]
-classes = obj_db['classes']
+
+# classes = obj_db['classes']
 # classes.insert_many([requests.get(url= api_classes + i).json() for i in all_classes])
 
 class About:
     @staticmethod
+    def all_list(type_):
+        return [i['name'] for i in requests.get(url= api_address + f'api/{type_}').json()['results']]
+    
+    @staticmethod
     def race_about(data: str , more: bool = False):
-        race_data = requests.get(url= api_races + data.lower()).json()
+        race_data = requests.get(url= api_address + 'api/races/' + data.lower()).json()
         
         answer_list = []
         answer_list.append(race_data['name'])
@@ -58,7 +59,7 @@ class About:
     
 class Race():
     def __init__(self, race: str):
-        self.race_data = requests.get(url= api_races + race.lower()).json()
+        self.race_data = requests.get(url= api_address + 'api/races/' + race.lower()).json()
         self.name = self.race_data['name']
         self.speed = self.race_data['speed']
         self.bonuses = {i["ability_score"]["name"] : i['bonus'] for i in self.race_data['ability_bonuses']}
@@ -71,14 +72,17 @@ class Race():
         self.traits = [i['index'] for i in self.race_data['traits']]
         self.subraces = [i['name'] for i in self.race_data['subraces']] if self.race_data['subraces'] else None
 
-    
+    def add_data(self, type_: str, characteristik: str):
+        if type_ in [i['type'] for i in self.race_option()]:
+            pass
     def race_option(self) -> list:
         options = [self.bonuse_opt, self.proficiencies_opt, self.languages_opt]
         answer = [{'str' : f'Choose {i["choose"]} {i["type"]}:',
                 'choose': i['choose'],
                 'cha' : [el['ability_score']['name'] if i['type'] == "ability_bonuses" else el['item']['name'] for el in i['from']['options']],
-                'type' : i['type']} for i in options if i]
+                'type' : i['type'],
+                'bonus' : i['from']['options'][0].get('bonus') } for i in options if i]
         if self.subraces:
-            answer.append({'type' : 'subraces', 'choose' : self.subraces})
+            answer.append({'type' : 'subraces', 'choose': len(self.subraces),'cha' : self.subraces})
         return answer
-# print(Race('Half-Elf').race_option())
+print(Race('elf').race_option())

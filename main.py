@@ -48,14 +48,18 @@ async def creat_1(message: types.Message, state: FSMContext):
 async def create_1_q(query: types.CallbackQuery, state: FSMContext):     
     async with state.proxy() as data:
         race = data['race']
-    if query.data == 'Ability_bonuses':
-        pass
-    elif query.data == 'proficiencies':
-        pass
-    elif query.data == 'languages':
-        pass
-    elif query.data == 'subraces':
-        pass
+    option = race.race_option()
+    text = ''
+    reply_markup = None
+    if query.data in ('subraces', 'ability_bonuses', 'proficiencies', 'languages'):
+        for i in range(len(option)):
+            if option[i]['type'] == query.data:
+                text = f"Choose {option[i]['choose']} {option[i]['type']}:"
+                reply_markup = options_choose(option[i])
+    else:
+        if query.data in About.all_list('ability-scores'):
+            pass
+    await query.message.edit_text(text=text, reply_markup=reply_markup)
 
 @dp.callback_query_handler(state=Form.creat_start)
 async def create_1_q(query: types.CallbackQuery, state: FSMContext):    
