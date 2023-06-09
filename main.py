@@ -49,16 +49,31 @@ async def create_1_q(query: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         race = data['race']
     option = race.race_option()
-    text = ''
+    text = "Let's set up some additional features:"
     reply_markup = None
     if query.data in ('subraces', 'ability_bonuses', 'proficiencies', 'languages'):
-        for i in range(len(option)):
-            if option[i]['type'] == query.data:
-                text = f"Choose {option[i]['choose']} {option[i]['type']}:"
-                reply_markup = options_choose(option[i])
+        for i in option:
+            if i['type'] == query.data:
+                text = f"Choose {i['choose']} {i['type']}:"
+                reply_markup = options_choose(i)
     else:
         if query.data in About.all_list('ability-scores'):
-            pass
+            if race.add_data('ability-scores', query.data):
+                text = f"Choose {race.bonuse_opt['choose']} ability_bonuses:"
+                reply_markup = options_choose(option, type='ability_bonuses')
+        elif query.data in About.all_list('languages'):
+            if race.add_data('languages', query.data):
+                text = f"Choose {race.languages_opt['choose']} languages:"
+                reply_markup = options_choose(option, type='languages')       
+        elif query.data in About.all_list('proficiencies'):
+            if race.add_data('proficiencies', query.data):
+                text = f"Choose {race.proficiencies_opt['choose']} proficiencies:"
+                reply_markup = options_choose(option, type='proficiencies')
+                
+    if not reply_markup:
+        reply_markup = options_race(race.race_option())
+    async with state.proxy() as data:
+        data['race'] = race
     await query.message.edit_text(text=text, reply_markup=reply_markup)
 
 @dp.callback_query_handler(state=Form.creat_start)
@@ -82,7 +97,7 @@ async def create_1_q(query: types.CallbackQuery, state: FSMContext):
     if options:
         answer = query.message.edit_text("Let's set up some additional features:", reply_markup=options_race(options))
     else:
-        answer = query.message.edit_text("Let's choose a class:", reply_markup=types.ReplyKeyboardRemove())
+        answer = query.message.edit_text("Let's choose a class:")
     await Form.race_option.set()
     await answer
         

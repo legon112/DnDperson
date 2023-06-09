@@ -22,7 +22,12 @@ def confirm_race(more : bool)-> types.InlineKeyboardMarkup:
 def options_race(options : list) -> types.InlineKeyboardMarkup:
     return types.InlineKeyboardMarkup().add(*[types.InlineKeyboardButton(i['type'].capitalize(), callback_data=i['type']) for i in options])
 
-def options_choose(options : list) -> types.InlineKeyboardMarkup:
-    return types.InlineKeyboardMarkup().add(*[types.InlineKeyboardButton(i, callback_data=i) for i in options['cha']])
-
+def options_choose(options : list, type : str = None) -> types.InlineKeyboardMarkup:
+    if type:
+        for i in options:
+            if i['type'] == type:
+                return types.InlineKeyboardMarkup().add(*[types.InlineKeyboardButton(el, callback_data=el) for el in i['cha']])
+    else:
+        return types.InlineKeyboardMarkup().add(*[types.InlineKeyboardButton(i, callback_data=i) for i in options['cha']])
+        
 
