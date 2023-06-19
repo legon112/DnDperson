@@ -7,9 +7,6 @@ confirm_button = types.InlineKeyboardButton('Confirm', callback_data='confirm')
 more_dutton = types.InlineKeyboardButton('More', callback_data='more')
 
 
-create = types.InlineKeyboardButton('Сreate your own', callback_data='create')
-create_random = types.InlineKeyboardButton('Create random character', callback_data='random')
-start_1_k = types.InlineKeyboardMarkup().add(create, create_random)
 
 choice_race = types.InlineKeyboardMarkup().add(*[types.InlineKeyboardButton(i, callback_data=i) for i in About.all_list('races')])
 

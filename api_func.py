@@ -1,12 +1,7 @@
 """Classes and Functions for work of Bot"""
-import re
-
 import requests
-from aiogram import types
 from peewee import *
 from pymongo import MongoClient
-
-
 
 api_address = 'https://www.dnd5eapi.co'
 
@@ -217,6 +212,7 @@ class Race():
     
     
     
+    
 class Character():
     """Describes the unified attributes and methods for work with them"""
     
@@ -387,6 +383,7 @@ Size: {self.size}\n'''
         self.id = id.message_id
         self.user = id['from']['username']
         
+    
         
         
 class Character_from_db():
@@ -490,14 +487,3 @@ class DB_func():
             id (int): id of the character
         """
         obj_db['Characters'].delete_one({'id' : id})
-        
-
-
-
-
-
-# my_collection = obj_db['Race']
-# my_collection.insert_many([requests.get(url= api_address + 'api/races/' + i.lower()).json() for i in About.all_list('races')])
-
-# my_collection = obj_db['Classes']
-# my_collection.insert_many([requests.get(url= api_address + 'api/classes/' + i.lower()).json() for i in About.all_list('classes')])

@@ -1,14 +1,14 @@
 """Main code of the Bot"""
-import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import StatesGroup, State
+from aiogram.dispatcher.filters.state import State, StatesGroup
 from decouple import config
-from keyboards import *
+
 from api_func import *
+from keyboards import *
 
 API_TOKEN = config('API_TOKEN')
 
@@ -20,7 +20,6 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 class Form(StatesGroup):
     """class with states for Bot"""
     first = State()
-    create_start = State()
     race_confirm = State()
     race_option = State()
     class_choice = State()
@@ -41,87 +40,26 @@ Here you can create, save, search for characters for the Dungeons & Dragons 5e t
 For commands, type /help""", reply_markup=types.ReplyKeyboardRemove())
     
     
-
-
-
-"""          !!!!!!SEARCHING CHARACTER!!!!!!               """
-@dp.message_handler(commands=['search'], state = '*')
-async def search_cmnd(message: types.Message):
-    """Switch to search mode"""
-    await Form.search.set()
-    await message.answer("Enter character ID:")
+@dp.message_handler(commands=['help'], state = '*')
+async def send_help(message: types.Message):
+    """Send list of commands"""
+    await message.reply("""/start - exit from all modes
+/help - list of commands
+/create - character creation
+/my_characters - list of your characters
+/search - search for a character by ID""")
     
-    
-@dp.message_handler(state = Form.search)
-async def search(message: types.Message, state: FSMContext):
-    """Search by ID"""
-    id = message.text
-    if id.isdigit():
-        character_dict = DB_func.find_by_id(int(id))
-        if not character_dict:
-            text = 'Character not found'
-        else:
-            text = Character_from_db(character_dict)
-    else: 
-        text = 'ID must be numbers'
-    await message.answer(text)
-"""          !!!!!!END OF SEARCHING CHARACTER!!!!!!               """    
-
-
-
-
-"""          !!!!!!WORK WITH USER CHARACTERS!!!!!!               """
-@dp.callback_query_handler(state = Form.character_info)
-async def character_info(query: types.CallbackQuery, state: FSMContext):
-    """Character data"""
-    if query.data == 'delete':
-        async with state.proxy() as data:
-            id = data['id']
-        DB_func.delete_character(id)
-        await state.finish()
-        text = 'Character deleted'
-        reply_markup = None
-    else:
-        text = Character_from_db(DB_func.find_by_id(int(query.data)))
-        reply_markup = delete
-        async with state.proxy() as data:
-            data['id'] = int(query.data)
-    await query.message.edit_text(text, reply_markup=reply_markup)
-    
-
-@dp.message_handler(commands=['my_characters'], state = '*')
-async def characters(message: types.Message):
-    """List of user characters"""
-    characters = DB_func.find_characters(message['from']['username'])
-    if characters: 
-        text = 'Select the desired character:'
-        reply_markup = characters_keyboard(characters)
-        await Form.character_info.set()
-    else:
-        text = "You don't have characters(\nYou can create them in /create menu"
-        reply_markup = None
-    await message.answer(text, reply_markup=reply_markup)
-"""        !!!!!!END OF WORK WITH USER CHARACTERS!!!!!!             """   
 
 
     
-
 """           !!!!!!CREATING OF CHARACTER!!!!!!            """
 @dp.message_handler(commands=['create'], state = '*')
-async def create_1(message: types.Message):
-    """Start for creating character"""
-    await Form.create_start.set()
-    await message.answer("Let's get started, do you want to create your own or get a random character?", reply_markup=start_1_k)
-    
-    
-@dp.callback_query_handler(state=Form.create_start)
-async def create_1_q(query: types.CallbackQuery):    
+async def create_1_q(message: types.Message):    
     """race selection"""
-    if query.data == 'create':
-        text = "Alright, let's start by choosing a race:"
-        reply_markup = choice_race
-        await Form.race_confirm.set()
-    await query.message.edit_text(text=text, reply_markup=reply_markup)
+    text = "Alright, let's start by choosing a race:"
+    reply_markup = choice_race
+    await Form.race_confirm.set()
+    await message.answer(text=text, reply_markup=reply_markup)
 
 
 @dp.callback_query_handler(lambda callback: callback.data == 'confirm',state=Form.race_confirm, )
@@ -273,11 +211,71 @@ async def final(message: types.Message, state: FSMContext):
     await message.answer(text)
     await state.finish()  
 """        !!!!!!END OF CREATING OF CHARACTER!!!!!!           """
-   
-   
+
+
+
+
+
+"""          !!!!!!WORK WITH USER CHARACTERS!!!!!!               """
+@dp.message_handler(commands=['my_characters'], state = '*')
+async def characters(message: types.Message):
+    """List of user characters"""
+    characters = [*DB_func.find_characters(message['from']['username'])]
+    if characters: 
+        text = 'Select the desired character:'
+        reply_markup = characters_keyboard(characters)
+        await Form.character_info.set()
+    else:
+        text = "You don't have characters(\nYou can create them in /create menu"
+        reply_markup = None
+    await message.answer(text, reply_markup=reply_markup)
+
+
+@dp.callback_query_handler(state = Form.character_info)
+async def character_info(query: types.CallbackQuery, state: FSMContext):
+    """Character data"""
+    if query.data == 'delete':
+        async with state.proxy() as data:
+            id = data['id']
+        DB_func.delete_character(id)
+        await state.finish()
+        text = 'Character deleted'
+        reply_markup = None
+    else:
+        text = Character_from_db(DB_func.find_by_id(int(query.data)))
+        reply_markup = delete
+        async with state.proxy() as data:
+            data['id'] = int(query.data)
+    await query.message.edit_text(text, reply_markup=reply_markup)
+"""        !!!!!!END OF WORK WITH USER CHARACTERS!!!!!!             """   
+
+
+
+
+"""          !!!!!!SEARCHING CHARACTER!!!!!!               """
+@dp.message_handler(commands=['search'], state = '*')
+async def search_cmnd(message: types.Message):
+    """Switch to search mode"""
+    await Form.search.set()
+    await message.answer("Enter character ID:")
     
     
+@dp.message_handler(state = Form.search)
+async def search(message: types.Message, state: FSMContext):
+    """Search by ID"""
+    id = message.text
+    if id.isdigit():
+        character_dict = DB_func.find_by_id(int(id))
+        if not character_dict:
+            text = 'Character not found'
+        else:
+            text = Character_from_db(character_dict)
+    else: 
+        text = 'ID must be numbers'
+    await message.answer(text)
+"""          !!!!!!END OF SEARCHING CHARACTER!!!!!!               """    
     
-    
+
+
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
