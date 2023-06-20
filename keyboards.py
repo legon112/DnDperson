@@ -3,17 +3,17 @@ from aiogram import types
 
 from api_func import About, Character
 
-confirm_button = types.InlineKeyboardButton('Confirm', callback_data='confirm')
-more_dutton = types.InlineKeyboardButton('More', callback_data='more')
+confirm_button = types.InlineKeyboardButton('Confirm', callback_data='confirm') # 'confirm' inline button 
+more_dutton = types.InlineKeyboardButton('More', callback_data='more') #'more' inline button 
 
 
 
-choice_race = types.InlineKeyboardMarkup().add(*[types.InlineKeyboardButton(i, callback_data=i) for i in About.all_list('races')])
+choice_race = types.InlineKeyboardMarkup().add(*[types.InlineKeyboardButton(i, callback_data=i) for i in About.all_list('races')]) #inline keyboard with all races
 
-choice_class = types.InlineKeyboardMarkup().add(*[types.InlineKeyboardButton(i, callback_data=i) for i in About.all_list('classes')])
+choice_class = types.InlineKeyboardMarkup().add(*[types.InlineKeyboardButton(i, callback_data=i) for i in About.all_list('classes')]) #inline keyboard with all classes
 
-save = types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('Save', callback_data='save'))
-delete = types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('Delete', callback_data='delete'))
+save = types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('Save', callback_data='save')) #inline keyboard with 'save' button
+delete = types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('Delete', callback_data='delete')) #inline keyboard with 'delete' button
 
 
 def confirm_race(more : bool)-> types.InlineKeyboardMarkup:

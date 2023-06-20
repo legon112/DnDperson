@@ -3,19 +3,19 @@ import requests
 from peewee import *
 from pymongo import MongoClient
 
-api_address = 'https://www.dnd5eapi.co'
+api_address = 'https://www.dnd5eapi.co' #addrеss of api server
 
-client_con = MongoClient()
-obj_db = client_con['NoDnD']
+client_con = MongoClient() #connection to the mongodb
+obj_db = client_con['NoDnD'] # object of 'NoDnD' database
 
 
 class Proficiencies(Model):
     """Class model for SQL Database"""
-    profic = CharField()
-    type = CharField()
+    profic = CharField() #ChraField column
+    type = CharField() #ChraField column
     class Meta:
         """Meta class for SQL Database"""
-        database = SqliteDatabase('DnD.db')
+        database = SqliteDatabase('DnD.db') #Path to the database
 
 
 class About:

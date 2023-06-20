@@ -10,12 +10,12 @@ from decouple import config
 from api_func import *
 from keyboards import *
 
-API_TOKEN = config('API_TOKEN')
+API_TOKEN = config('API_TOKEN') #API TOKEN
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO) #Configure logging
 
-bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot, storage=MemoryStorage())
+bot = Bot(token=API_TOKEN) #Initialize bot
+dp = Dispatcher(bot, storage=MemoryStorage()) #dispatcher
 
 class Form(StatesGroup):
     """class with states for Bot"""
